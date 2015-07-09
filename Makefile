@@ -1,4 +1,5 @@
 #
+# newline
 # Makefile for juju-core.
 #
 
