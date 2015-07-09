@@ -1,6 +1,7 @@
 #
 # newline
 # Makefile for juju-core.
+# just a comment
 #
 
 ifndef GOPATH
