@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"fmt"
 	"io/ioutil"
@@ -37,6 +38,7 @@ import (
 	"github.com/juju/juju/state/toolstorage"
 	"github.com/juju/juju/storage/poolmanager"
 	"github.com/juju/juju/utils/ssh"
+	"github.com/juju/juju/utils/x509"
 	"github.com/juju/juju/version"
 	"github.com/juju/juju/worker/peergrouper"
 )
@@ -45,6 +47,7 @@ var (
 	maybeInitiateMongoServer = peergrouper.MaybeInitiateMongoServer
 	agentInitializeState     = agent.InitializeState
 	sshGenerateKey           = ssh.GenerateKey
+	winrmGenerateKey         = x509.GenerateKey
 	newStateStorage          = storage.NewStorage
 	minSocketTimeout         = 1 * time.Minute
 	logger                   = loggo.GetLogger("juju.cmd.jujud")
@@ -154,6 +157,19 @@ func (c *BootstrapCommand) Run(_ *cmd.Context) error {
 	if err != nil {
 		return errors.Annotate(err, "failed to add public key to environment config")
 	}
+	// Generate a private WinRM key for the state servers, and addrs
+	// the certificate to the environment config. We'll add the
+	// private key to StateServingInfo below.
+	Subject := pkix.Name{
+		CommonName: "juju@Juju",
+	}
+	ValidFrom := time.Now()
+	ValidFor := 365 * 24 * time.Hour
+
+	winrm_privateKey, winrm_cert, err := winrmGenerateKey(Subject, ValidFrom, ValidFor)
+	if err != nil {
+		return errors.Annotate(err, "failed to generate system certificate")
+	}
 
 	// Generate a shared secret for the Mongo replica set, and write it out.
 	sharedSecret, err := mongo.GenerateSharedSecret()
@@ -166,6 +182,8 @@ func (c *BootstrapCommand) Run(_ *cmd.Context) error {
 	}
 	info.SharedSecret = sharedSecret
 	info.SystemIdentity = privateKey
+	info.WinrmCert = winrm_cert
+	info.WinrmPrivateKey = winrm_privateKey
 	err = c.ChangeConfig(func(agentConfig agent.ConfigSetter) error {
 		agentConfig.SetStateServingInfo(info)
 		return nil
@@ -177,6 +195,11 @@ func (c *BootstrapCommand) Run(_ *cmd.Context) error {
 
 	// Create system-identity file
 	if err := agent.WriteSystemIdentityFile(agentConfig); err != nil {
+		return err
+	}
+
+	// Create winrm-cert file
+	if err := agent.WriteWinrmCertFile(agentConfig); err != nil {
 		return err
 	}
 

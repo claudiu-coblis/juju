@@ -99,6 +99,9 @@ var (
 // SystemIdentity is the name of the file where the environment SSH key is kept.
 const SystemIdentity = "system-identity"
 
+// WinrmCert is the name of the file where the environment certificate is kept.
+const WinrmCert = "winrmcert"
+
 const (
 	LxcBridge              = "LXC_BRIDGE"
 	ProviderType           = "PROVIDER_TYPE"
@@ -134,6 +137,10 @@ type Config interface {
 	// SystemIdentityPath returns the path of the file where the environment
 	// SSH key is kept.
 	SystemIdentityPath() string
+
+	// WinrmCertPath returns the path of the file where the environment
+	// certificate is kept.
+	WinrmCertPath() string
 
 	// Jobs returns a list of MachineJobs that need to run.
 	Jobs() []multiwatcher.MachineJob
@@ -602,6 +609,10 @@ func (c *configInternal) LogDir() string {
 
 func (c *configInternal) SystemIdentityPath() string {
 	return filepath.Join(c.dataDir, SystemIdentity)
+}
+
+func (c *configInternal) WinrmCertPath() string {
+	return filepath.Join(c.dataDir, WinrmCert)
 }
 
 func (c *configInternal) Jobs() []multiwatcher.MachineJob {

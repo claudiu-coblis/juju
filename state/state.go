@@ -92,8 +92,10 @@ type StateServingInfo struct {
 	PrivateKey   string
 	CAPrivateKey string
 	// this will be passed as the KeyFile argument to MongoDB
-	SharedSecret   string
-	SystemIdentity string
+	SharedSecret    string
+	SystemIdentity  string
+	WinrmCert       string
+	WinrmPrivateKey string
 }
 
 // IsStateServer returns true if this state instance has the bootstrap

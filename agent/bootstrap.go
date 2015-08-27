@@ -129,13 +129,15 @@ var isLocalEnv = func(cfg *config.Config) bool {
 
 func paramsStateServingInfoToStateStateServingInfo(i params.StateServingInfo) state.StateServingInfo {
 	return state.StateServingInfo{
-		APIPort:        i.APIPort,
-		StatePort:      i.StatePort,
-		Cert:           i.Cert,
-		PrivateKey:     i.PrivateKey,
-		CAPrivateKey:   i.CAPrivateKey,
-		SharedSecret:   i.SharedSecret,
-		SystemIdentity: i.SystemIdentity,
+		APIPort:         i.APIPort,
+		StatePort:       i.StatePort,
+		Cert:            i.Cert,
+		PrivateKey:      i.PrivateKey,
+		CAPrivateKey:    i.CAPrivateKey,
+		SharedSecret:    i.SharedSecret,
+		SystemIdentity:  i.SystemIdentity,
+		WinrmCert:       i.WinrmCert,
+		WinrmPrivateKey: i.WinrmPrivateKey,
 	}
 }
 

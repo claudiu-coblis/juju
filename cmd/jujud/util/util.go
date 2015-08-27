@@ -182,13 +182,15 @@ func NewEnsureServerParams(agentConfig agent.Config) (mongo.EnsureServerParams, 
 	}
 
 	params := mongo.EnsureServerParams{
-		APIPort:        si.APIPort,
-		StatePort:      si.StatePort,
-		Cert:           si.Cert,
-		PrivateKey:     si.PrivateKey,
-		CAPrivateKey:   si.CAPrivateKey,
-		SharedSecret:   si.SharedSecret,
-		SystemIdentity: si.SystemIdentity,
+		APIPort:         si.APIPort,
+		StatePort:       si.StatePort,
+		Cert:            si.Cert,
+		PrivateKey:      si.PrivateKey,
+		CAPrivateKey:    si.CAPrivateKey,
+		SharedSecret:    si.SharedSecret,
+		SystemIdentity:  si.SystemIdentity,
+		WinrmCert:       si.WinrmCert,
+		WinrmPrivateKey: si.WinrmPrivateKey,
 
 		DataDir:              agentConfig.DataDir(),
 		Namespace:            agentConfig.Value(agent.Namespace),

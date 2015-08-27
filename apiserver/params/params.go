@@ -452,8 +452,10 @@ type StateServingInfo struct {
 	// cert can be generated when needed.
 	CAPrivateKey string
 	// this will be passed as the KeyFile argument to MongoDB
-	SharedSecret   string
-	SystemIdentity string
+	SharedSecret    string
+	SystemIdentity  string
+	WinrmCert       string
+	WinrmPrivateKey string
 }
 
 // IsMasterResult holds the result of an IsMaster API call.

@@ -139,6 +139,12 @@ type EnsureServerParams struct {
 	// SystemIdentity is the identity of the system.
 	SystemIdentity string
 
+	// WinrmCert is the winrm certificate.
+	WinrmCert string
+
+	// WinrmPrivateKey is the winrm certificate's private key.
+	WinrmPrivateKey string
+
 	// DataDir is the machine agent data directory.
 	DataDir string
 

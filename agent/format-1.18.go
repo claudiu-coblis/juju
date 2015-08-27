@@ -56,6 +56,8 @@ type format_1_18Serialization struct {
 	StatePort       int    `yaml:",omitempty"`
 	SharedSecret    string `yaml:",omitempty"`
 	SystemIdentity  string `yaml:",omitempty"`
+	WinrmCert       string `yaml:",omitempty"`
+	WinrmPrivateKey string `yaml:",omitempty"`
 }
 
 func init() {
@@ -122,13 +124,15 @@ func (formatter_1_18) unmarshal(data []byte) (*configInternal, error) {
 	}
 	if len(format.StateServerKey) != 0 {
 		config.servingInfo = &params.StateServingInfo{
-			Cert:           format.StateServerCert,
-			PrivateKey:     format.StateServerKey,
-			CAPrivateKey:   format.CAPrivateKey,
-			APIPort:        format.APIPort,
-			StatePort:      format.StatePort,
-			SharedSecret:   format.SharedSecret,
-			SystemIdentity: format.SystemIdentity,
+			Cert:            format.StateServerCert,
+			PrivateKey:      format.StateServerKey,
+			CAPrivateKey:    format.CAPrivateKey,
+			APIPort:         format.APIPort,
+			StatePort:       format.StatePort,
+			SharedSecret:    format.SharedSecret,
+			SystemIdentity:  format.SystemIdentity,
+			WinrmCert:       format.WinrmCert,
+			WinrmPrivateKey: format.WinrmPrivateKey,
 		}
 		// There's a private key, then we need the state port,
 		// which wasn't always in the  1.18 format. If it's not present
@@ -179,6 +183,8 @@ func (formatter_1_18) marshal(config *configInternal) ([]byte, error) {
 		format.StatePort = config.servingInfo.StatePort
 		format.SharedSecret = config.servingInfo.SharedSecret
 		format.SystemIdentity = config.servingInfo.SystemIdentity
+		format.WinrmCert = config.servingInfo.WinrmCert
+		format.WinrmPrivateKey = config.servingInfo.WinrmPrivateKey
 	}
 	if config.stateDetails != nil {
 		format.StateAddresses = config.stateDetails.addresses

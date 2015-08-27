@@ -30,3 +30,22 @@ func WriteSystemIdentityFile(c Config) error {
 	}
 	return nil
 }
+
+func WriteWinrmCertFile(c Config) error {
+	info, ok := c.StateServingInfo()
+	if !ok {
+		return errors.Trace(ErrNoStateServingInfo)
+	}
+	// Write non-empty contents to the file, otherwise delete it
+	if info.WinrmCert != "" {
+		logger.Infof("writing winrm certificate file")
+		err := utils.AtomicWriteFile(c.WinrmCertPath(), []byte(info.WinrmCert), 0600)
+		if err != nil {
+			return errors.Annotate(err, "cannot write system identity")
+		}
+	} else {
+		logger.Infof("removing winrm certificate file")
+		os.Remove(c.WinrmCertPath())
+	}
+	return nil
+}

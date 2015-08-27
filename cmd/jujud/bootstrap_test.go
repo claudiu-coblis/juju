@@ -4,6 +4,7 @@
 package main
 
 import (
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
@@ -102,6 +103,10 @@ func (s *BootstrapSuite) SetUpTest(c *gc.C) {
 		return "private-key", "public-key", nil
 	})
 
+	s.PatchValue(&winrmGenerateKey, func(subject pkix.Name, validFrom time.Time, validFor time.Duration) (string, string, error) {
+		return "winrm private-key", "winrm cert", nil
+	})
+
 	s.MgoSuite.SetUpTest(c)
 	s.dataDir = c.MkDir()
 	s.logDir = c.MkDir()
@@ -168,11 +173,13 @@ func (s *BootstrapSuite) initBootstrapCommand(c *gc.C, jobs []multiwatcher.Machi
 		},
 	}
 	servingInfo := params.StateServingInfo{
-		Cert:         "some cert",
-		PrivateKey:   "some key",
-		CAPrivateKey: "another key",
-		APIPort:      3737,
-		StatePort:    gitjujutesting.MgoServer.Port(),
+		Cert:            "some cert",
+		PrivateKey:      "some key",
+		CAPrivateKey:    "another key",
+		APIPort:         3737,
+		WinrmCert:       "some winrmcert",
+		WinrmPrivateKey: "some winrmprivatekey",
+		StatePort:       gitjujutesting.MgoServer.Port(),
 	}
 
 	machineConf, err = agent.NewStateMachineConfig(agentParams, servingInfo)
@@ -534,6 +541,20 @@ func (s *BootstrapSuite) TestSystemIdentityWritten(c *gc.C) {
 	data, err := ioutil.ReadFile(filepath.Join(s.dataDir, agent.SystemIdentity))
 	c.Assert(err, jc.ErrorIsNil)
 	c.Assert(string(data), gc.Equals, "private-key")
+}
+
+func (s *BootstrapSuite) TestWinrmCertWritten(c *gc.C) {
+	_, err := os.Stat(filepath.Join(s.dataDir, agent.WinrmCert))
+	c.Assert(err, jc.Satisfies, os.IsNotExist)
+
+	_, cmd, err := s.initBootstrapCommand(c, nil, "--env-config", s.b64yamlEnvcfg, "--instance-id", string(s.instanceId))
+	c.Assert(err, jc.ErrorIsNil)
+	err = cmd.Run(nil)
+	c.Assert(err, jc.ErrorIsNil)
+
+	data, err := ioutil.ReadFile(filepath.Join(s.dataDir, agent.WinrmCert))
+	c.Assert(err, jc.ErrorIsNil)
+	c.Assert(string(data), gc.Equals, "winrm cert")
 }
 
 func (s *BootstrapSuite) TestDownloadedToolsMetadata(c *gc.C) {
